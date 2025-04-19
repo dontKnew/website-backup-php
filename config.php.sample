@@ -1,0 +1,33 @@
+<?php 
+date_default_timezone_set('Asia/Kolkata');
+ini_set('max_execution_time', 3000);
+ini_set('memory_limit', '-1');
+ignore_user_abort(true);
+
+const BACKUP_PATH = __DIR__ . '/backup';
+
+const ZIP_FILE_NAME = 'courierdunia';
+const FILE_PATH = __DIR__."/../";
+
+// Folder or File Exclude by Full Path...
+const FOLDER_EXCLUDE = [
+    FILE_PATH.'/admin/source/vendor', 
+    FILE_PATH.'/admin/source/writable', 
+    FILE_PATH.'/oldbackup-le', 
+    FILE_PATH.'/test', 
+    FILE_PATH.'/vendor',
+    FILE_PATH.'/writable',
+    FILE_PATH.'/source/vendor'
+];
+
+// Database Configuration
+const DB_HOST = 'localhost';
+const DB_USER = '';
+const DB_PASSWORD = '';
+const DB_NAME = '';
+
+
+// DO NOT TOUCH HERE..
+if(!file_exists(BACKUP_PATH)){
+    mkdir(BACKUP_PATH, 0777, true);
+}
