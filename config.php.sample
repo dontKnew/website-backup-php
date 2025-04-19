@@ -20,11 +20,19 @@ const FOLDER_EXCLUDE = [
     FILE_PATH.'/source/vendor'
 ];
 
+//KEEP LAST 5 ZIP BACKUP FILES 
+const KEEP_LAST_ZIP = 5;
+
+//KEEP LAST SQL BACKUP FILES
+const KEEP_LAST_SQL = 30;
+
 // Database Configuration
 const DB_HOST = 'localhost';
 const DB_USER = '';
 const DB_PASSWORD = '';
 const DB_NAME = '';
+const DB_RUN_TYPE = "shell_exec"; 
+
 
 
 // DO NOT TOUCH HERE..

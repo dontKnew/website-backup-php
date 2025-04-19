@@ -1,6 +1,9 @@
 <?php 
 require_once __DIR__."/config.php";
 
+keepSomeSQLFiles(BACKUP_PATH, KEEP_LAST_SQL);
+keepSomeZipFiles(BACKUP_PATH, KEEP_LAST_ZIP);
+
 $folder_excluded = FOLDER_EXCLUDE; 
 $destination_filename = ZIP_FILE_NAME . "_" . date("Y-m-d") . ".zip";
 $destination =BACKUP_PATH . "/" . $destination_filename;
@@ -85,6 +88,29 @@ function zipDirectory($source, $destination, $excludedFolders = []) {
         return 'Unable to close the zip file properly.';
     }
     return true;
+}
+
+
+function deleteOldFiles($backupFolder, $extension, $keepCount) {
+    $files = glob($backupFolder . '/*.' . $extension);
+    usort($files, function($a, $b) {
+        return filemtime($b) - filemtime($a);
+    });
+    $filesToDelete = array_slice($files, $keepCount);
+    foreach ($filesToDelete as $file) {
+        if (is_file($file)) {
+            unlink($file);
+            echo "Deleted: " . basename($file) . "\n";
+        }
+    }
+}
+
+function keepSomeSQLFiles($backupFolder, $keepCount) {
+    deleteOldFiles($backupFolder, 'sql', $keepCount);
+}
+
+function keepSomeZipFiles($backupFolder, $keepCount) {
+    deleteOldFiles($backupFolder, 'zip', $keepCount);
 }
 ?>
 
