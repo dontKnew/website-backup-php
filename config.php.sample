@@ -1,4 +1,5 @@
 <?php 
+
 date_default_timezone_set('Asia/Kolkata');
 ini_set('max_execution_time', 3000);
 ini_set('memory_limit', '-1');
@@ -33,9 +34,25 @@ const DB_PASSWORD = '';
 const DB_NAME = '';
 const DB_RUN_TYPE = "shell_exec"; 
 
-
-
 // DO NOT TOUCH HERE..
 if(!file_exists(BACKUP_PATH)){
     mkdir(BACKUP_PATH, 0777, true);
 }
+
+// GOOGLE_DRIVE Settings
+const GOOGLE_DRIVE_FOLDER_ID = '1gmbIHft5AeBSutbJUwrI6UAM7c_rxqiM';
+const GOOGLE_SERVICE_ACCOUNT_JSON = __DIR__.'/service.json';
+
+// Download Settings
+    const DOWNLOAD_PATH = __DIR__ . '/download';
+    
+    const IMPORT_DATABASE_FROM_GOOGLE_DRIVE = false; 
+    const GOOGLE_DRIVE_DATABASE_ID = "17-";
+    const IMPORT_DATABASE = false;
+
+    const IMPORT_FILE_FROM_GOOGLE_DRIVE = false; 
+    const GOOGLE_DRIVE_FILE_ID = "";
+    const EXTRACT_GOOGLE_DRIVE_FILE = false; 
+    const EXTRACT_FILE_PATH = "";    // extract to blank folder 
+
+

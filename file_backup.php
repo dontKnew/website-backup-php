@@ -1,117 +1,47 @@
 <?php 
-require_once __DIR__."/config.php";
-
-keepSomeSQLFiles(BACKUP_PATH, KEEP_LAST_SQL);
-keepSomeZipFiles(BACKUP_PATH, KEEP_LAST_ZIP);
-
-$folder_excluded = FOLDER_EXCLUDE; 
-$destination_filename = ZIP_FILE_NAME . "_" . date("Y-m-d") . ".zip";
-$destination =BACKUP_PATH . "/" . $destination_filename;
-$file_paths =FILE_PATH; 
-
-$response = zipDirectory($file_paths, $destination, $folder_excluded);
-if($response) {
-    echo $destination_filename . " Response ".$response;
-} else {
-    echo "Error: $response";
-}
-
-function zipDirectory($source, $destination, $excludedFolders = []) {
-    if (!extension_loaded('zip')) {
-        return 'Zip extension is not loaded.';
+require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__ . '/helper.php';
+require_once __DIR__ . "/config.php";
+require_once __DIR__.'/Drive.php';
+use w3lifer\Google\Drive;
+try {    
+    $folder_excluded = FOLDER_EXCLUDE; 
+    $destination_filename = ZIP_FILE_NAME . "_" . date("Y-m-d") . ".zip";
+    $destination = BACKUP_PATH . "/" . $destination_filename;
+    $file_paths = FILE_PATH; 
+    $hasBackup = false;
+    $response = zipDirectory($file_paths, $destination, $folder_excluded);
+    if($response) {
+        $hasBackup = true;
+    } else {
+        logs($response);
     }
-    if (!file_exists($source)) {
-        return $source.' - directory does not exist.';
-    }
-    if(file_exists($destination)){
-        if (!unlink($destination)) {
-            return "Unable to delete the old zip file.";
-        }
-    }
-    $zip = new ZipArchive();
-    if ($zip->open($destination, ZipArchive::CREATE) !== true) {
-        return 'Unable to create zip file at the destination path.';
-    }
-
-    $source = realpath($source);
-    $excludedFolders = array_filter(array_map('realpath', $excludedFolders));
-
-    // Helper: check if a path is in excluded list
-    $isExcluded = function ($path) use ($excludedFolders) {
-        foreach ($excludedFolders as $excluded) {
-            if ($excluded && strpos($path, $excluded) === 0) {
-                return true;
+    if ($hasBackup) {
+        if (file_exists($destination)) {
+            logs("Files Backup Created : ". $destination_filename . "(". getFileSize($destination) . ")", "INFO");
+            if (empty(GOOGLE_SERVICE_ACCOUNT_JSON)) {
+                logs("FileGoogleDrive-Error: GOOGLE_SERVICE_ACCOUNT_JSON is not set");
+                exit(1);
             }
-        }
-        return false;
-    };
-
-    if (is_dir($source)) {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        foreach ($iterator as $file) {
-            /** @var SplFileInfo $file */
-            $fullPath = $file->getPathname();
-
-            // Skip symlinks or unreadable paths
-            if (!$file->isReadable() || is_link($fullPath)) {
-                continue;
+            $config = ['pathToCredentials' => GOOGLE_SERVICE_ACCOUNT_JSON];
+            $drive = new Drive($config);
+            $fileId = $drive->upload($destination, [GOOGLE_DRIVE_FOLDER_ID]);
+            if (empty($fileId)) {
+                logs("File Upload To Google Drive Failed");
+            } else {
+                logs("File Uploaded : $fileId", "INFO");
+                unlink($destination);
             }
-
-            $realPath = realpath($fullPath);
-            if (!$realPath || $isExcluded($realPath)) {
-                continue;
-            }
-
-            $relativePath = ltrim(str_replace($source, '', $realPath), DIRECTORY_SEPARATOR);
-
-            if ($file->isDir()) {
-                if (!$zip->addEmptyDir($relativePath)) {
-                    return "Unable to add directory: $realPath Relative Path: $relativePath";
-                }
-            } elseif ($file->isFile()) {
-                if (!$zip->addFile($realPath, $relativePath)) {
-                    return "Unable to add file: $realPath";
-                }
-            }
-        }
-    } elseif (is_file($source)) {
-        if (!$zip->addFile($source, basename($source))) {
-            return 'Unable to add file: ' . $source;
+        } else {
+            logs("$destination not found");
         }
     }
 
-    if (!$zip->close()) {
-        return 'Unable to close the zip file properly.';
-    }
-    return true;
+} catch (Exception $e) {
+    logs($e->getMessage() . "- Line " . $e->getLine() . " Path " . $e->getFile());
+    exit(1);
 }
 
-
-function deleteOldFiles($backupFolder, $extension, $keepCount) {
-    $files = glob($backupFolder . '/*.' . $extension);
-    usort($files, function($a, $b) {
-        return filemtime($b) - filemtime($a);
-    });
-    $filesToDelete = array_slice($files, $keepCount);
-    foreach ($filesToDelete as $file) {
-        if (is_file($file)) {
-            unlink($file);
-            echo "Deleted: " . basename($file) . "\n";
-        }
-    }
-}
-
-function keepSomeSQLFiles($backupFolder, $keepCount) {
-    deleteOldFiles($backupFolder, 'sql', $keepCount);
-}
-
-function keepSomeZipFiles($backupFolder, $keepCount) {
-    deleteOldFiles($backupFolder, 'zip', $keepCount);
-}
 ?>
 
 

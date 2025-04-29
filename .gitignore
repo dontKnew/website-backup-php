@@ -1,2 +1,6 @@
 backup
 config.php
+vendor
+backup.log
+download
+service.json
