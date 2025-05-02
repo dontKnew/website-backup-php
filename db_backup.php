@@ -5,6 +5,10 @@ require_once __DIR__ . "/config.php";
 require_once __DIR__.'/Drive.php';
 use w3lifer\Google\Drive;
 try {
+    if (!DATABASE_BACKUP) {
+        logs("DB Backup is disabled");
+        exit(1);
+    }
 
     $user = escapeshellcmd(DB_USER);
     $pass = escapeshellcmd(DB_PASSWORD);
@@ -33,13 +37,15 @@ try {
         }
         $output = shell_exec($command);
         if ($output === null) {
-            logs($output);
+            logs("Command failed to execute.");
+        } elseif (stripos($output, 'error') !== false || stripos($output, 'failed') !== false) {
+            logs("Command ran but returned an error: " . $output);
         } else {
             $hasBackup = true;
         }
     }
 
-    if ($hasBackup) {
+    if ($hasBackup && EXPORT_DATABASE_TO_GOOGLE_DRIVE) {
         if (file_exists($dir)) {
             logs("DB Backup Created : ". $filename . "(". getFileSize($dir) . ")", "INFO");
             if (empty(GOOGLE_SERVICE_ACCOUNT_JSON)) {
@@ -51,10 +57,12 @@ try {
             $fileId = $drive->upload($dir, [GOOGLE_DRIVE_FOLDER_ID]);
             if (empty($fileId)) {
                 logs("DB Upload To Google Drive Failed");
-                unlink($dir);
                 exit(1);
             } else {
                 logs("DB Uploaded: $fileId", "INFO");
+                if(LOCAL_DELETE_DATABASE_AFTER_EXPORT_TO_GOOGLE_DRIVE){
+                    unlink($dir);
+                }
             }
         } else {
             logs("$dir not found");
