@@ -7,10 +7,21 @@ ignore_user_abort(true);
 
 const BACKUP_PATH = __DIR__ . '/backup';
 
+// Database Configuration
+const DATABASE_BACKUP = true;
+const DB_HOST = 'localhost';
+const DB_USER = 'courierdunia';
+const DB_PASSWORD = '9u04lbd2(5j.iIV6';
+const DB_NAME = 'courierdunia';
+const DB_RUN_TYPE = "shell_exec"; 
+const EXPORT_DATABASE_TO_GOOGLE_DRIVE = false; 
+const LOCAL_DELETE_DATABASE_AFTER_EXPORT_TO_GOOGLE_DRIVE = false;
+
+
+// File Backup Configuration
+const FILE_BACKUP = false; 
 const ZIP_FILE_NAME = 'courierdunia';
 const FILE_PATH = __DIR__."/../";
-
-// Folder or File Exclude by Full Path...
 const FOLDER_EXCLUDE = [
     FILE_PATH.'/admin/source/vendor', 
     FILE_PATH.'/admin/source/writable', 
@@ -20,24 +31,9 @@ const FOLDER_EXCLUDE = [
     FILE_PATH.'/writable',
     FILE_PATH.'/source/vendor'
 ];
+const EXPORT_FILE_TO_GOOGLE_DRIVE = false; // 
+const LOCAL_DELETE_FILE_AFTER_EXPORT_TO_GOOGLE_DRIVE = false; 
 
-//KEEP LAST 5 ZIP BACKUP FILES 
-const KEEP_LAST_ZIP = 5;
-
-//KEEP LAST SQL BACKUP FILES
-const KEEP_LAST_SQL = 30;
-
-// Database Configuration
-const DB_HOST = 'localhost';
-const DB_USER = '';
-const DB_PASSWORD = '';
-const DB_NAME = '';
-const DB_RUN_TYPE = "shell_exec"; 
-
-// DO NOT TOUCH HERE..
-if(!file_exists(BACKUP_PATH)){
-    mkdir(BACKUP_PATH, 0777, true);
-}
 
 // GOOGLE_DRIVE Settings
 const GOOGLE_DRIVE_FOLDER_ID = '1gmbIHft5AeBSutbJUwrI6UAM7c_rxqiM';
@@ -46,13 +42,17 @@ const GOOGLE_SERVICE_ACCOUNT_JSON = __DIR__.'/service.json';
 // Download Settings
     const DOWNLOAD_PATH = __DIR__ . '/download';
     
-    const IMPORT_DATABASE_FROM_GOOGLE_DRIVE = false; 
-    const GOOGLE_DRIVE_DATABASE_ID = "17-";
-    const IMPORT_DATABASE = false;
+    const IMPORT_DATABASE_FROM_GOOGLE_DRIVE = false;  // if false, then import from local
+    const GOOGLE_DRIVE_DATABASE_ID = "17-E450tfeV6prLH6tCs9ANdVujdjos4v";
+    const IMPORT_DATABASE_PATH = DOWNLOAD_PATH. '/courierdunia_2025-04-29.sql'; // if IMPORT_DATABASE_FROM_GOOGLE_DRIVE false, then pickup from here
+    const IMPORT_DATABASE = true;
 
     const IMPORT_FILE_FROM_GOOGLE_DRIVE = false; 
-    const GOOGLE_DRIVE_FILE_ID = "";
+    const GOOGLE_DRIVE_FILE_ID = "1wBXWCkbkfFY0ZD7wzCnFriSMS5lm8Tin";
     const EXTRACT_GOOGLE_DRIVE_FILE = false; 
     const EXTRACT_FILE_PATH = "";    // extract to blank folder 
-
-
+    
+// DO NOT TOUCH HERE..
+if(!file_exists(BACKUP_PATH)){
+    mkdir(BACKUP_PATH, 0777, true);
+}
